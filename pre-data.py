@@ -2,13 +2,14 @@ import openpyxl
 import pyexcel
 import datetime
 import chinese_calendar
+import pendulum
+from pyexcel.cookbook import extract_a_sheet_from_a_book
 
 
 
 class ReadOtData:
     def __init__(self):
-        pass
-        self.filename = "20200717.xlsx"
+        self.filename = "new_ot.xlsx"
 
     def read_data(self):
         wb = openpyxl.load_workbook(filename=self.filename)
@@ -19,6 +20,27 @@ class ReadOtData:
         # print(records[0])
         # print(type(records[0]))
         # print(records[0].keys())
+        return records
+
+
+class ReadWtData:
+    def __init__(self):
+        self.filename = "new_wt.xlsx"
+
+    def read_data(self):
+        wb = openpyxl.load_workbook(filename=self.filename)
+        print(wb)
+
+    def read_xlsx(self):
+        records = pyexcel.get_records(file_name=self.filename)
+        # print(records[0])
+        # print(type(records[0]))
+        # print(records[0].keys())
+        return records
+
+    def read_sheet(self):
+        extract_a_sheet_from_a_book(self.filename, "原始记录", "temp.xlsx")
+        records = pyexcel.get_records(filename="原始记录_temp.xlsx")
         return records
 
 
@@ -50,6 +72,7 @@ class IsWorkDay:
         print("is holiday?", on_holiday)
         print("holiday name?", holiday_name)
 
+    @property
     def res(self):
         return self.w_res
 
@@ -70,6 +93,7 @@ class OtHours:
         self.ot_hours = (ot_end - ot_start).seconds
         print(self.ot_hours)
 
+    @property
     def res(self):
         return self.ot_hours
 
@@ -83,17 +107,20 @@ class CalDate:
         # ot_name = ot_records[0]['over']
         # print(ot_name)
         ot_start = StrToDatetimeHM(ot_records[0]['开始时间']).res
-        print(type(ot_start))
+        print(ot_start)
         d_res = IsWorkDay(ot_start).res
         if d_res is True:
             print("workday")
         else:
             print("holiday")
         ot_end = StrToDatetimeHM(ot_records[0]['结束时间']).res
-        ot_hours = OtHours(ot_start, ot_end).res
-        print(ot_hours)
+        print(ot_end)
+        ot_mins = OtHours(ot_start, ot_end).res / 60
+        print(ot_mins)
         # for ot_r in ot_records:
         #     print()
+
+
 
 
 
@@ -101,5 +128,6 @@ class CalDate:
 WorkDay().is_workday()
 CalDate().calculate_date()
     # ReadOtData().read_xlsx()
-
+x = ReadWtData().read_sheet()
+print(x)
 
