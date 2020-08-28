@@ -4,34 +4,50 @@ import chinese_calendar
 
 
 
+# class StrToDatetime:
+#     def __init__(self, str_time):
+#         self.dt_day = str_time.split()[0]
+#         self.dt_time = str_time.split()[1]
+#
+#     def dt_hrmin(self):
+#         self.dt_time = datetime.datetime.strptime(self.dt_time, '%H:%M')
+#
+#     def dt_ymd(self):
+#         self.dt_day = datetime.datetime.strptime(self.dt_day, '%Y-%m-%d')
+#
+#     @property
+#     def res(self):
+#         self.dt_ymd()
+#         self.dt_hrmin()
+#         return self.dt_day, self.dt_time
+
+
 class StrToDatetime:
     def __init__(self, str_time):
-        self.dt_day = str_time.split()[0]
-        self.dt_time = str_time.split()[1]
+        self.time_tr = str_time
 
     def dt_hrmin(self):
-        self.dt_time = datetime.datetime.strptime(self.dt_time, '%H:%M')
+        hm = datetime.datetime.strptime(self.time_tr, '%H:%M')
+        return hm
 
     def dt_ymd(self):
-        self.dt_day = datetime.datetime.strptime(self.dt_day, '%Y-%m-%d')
-
-    @property
-    def res(self):
-        self.dt_ymd()
-        self.dt_hrmin()
-        return self.dt_day, self.dt_time
+        ymd = datetime.datetime.strptime(self.time_tr, '%Y-%m-%d')
+        return ymd
 
 
-class OtHours:
-    def __init__(self, ot_start, ot_end):
-        print(type(ot_start))
-        print(type(ot_end))
-        self.ot_hours = (ot_end - ot_start).seconds
-        print(self.ot_hours)
+class ElasTime:
+    def __init__(self, time_start, time_end):
+        self.time_start = time_start
+        self.time_end = time_end
 
-    @property
-    def res(self):
-        return self.ot_hours
+    def hm_str_to_dt(self):
+        self.time_start = StrToDatetime(self.time_start).dt_hrmin()
+        self.time_end = StrToDatetime(self.time_end).dt_hrmin()
+
+    def elas_hrs(self):
+        self.hm_str_to_dt()
+        es = (self.time_end - self.time_start).seconds/3600
+        return es
 
 
 class IsWorkDay:
@@ -115,7 +131,7 @@ class CalDate:
             print("holiday")
         ot_end = StrToDatetime(ot_records[0]['结束时间']).res
         print(ot_end)
-        ot_mins = OtHours(ot_start, ot_end).res / 60
+        ot_mins = ElasTime(ot_start, ot_end).res / 60
         print(ot_mins)
 
 
@@ -124,6 +140,34 @@ class CalDate:
 #     # ReadOtData().read_xlsx()
 # x = ReadWtData().read_sheet()
 # print(x)
+
+
+class CalWt:
+    def __init__(self):
+        self.wb = openpyxl.load_workbook(filename='new_wt.xlsx')
+
+    def match_records(self, name, date):
+        # print(name)
+        # print(date)
+        wt_records = self.wb
+        for wt_ws in wt_records:
+            if wt_ws.title == "每日统计":
+                for rec in wt_ws.rows:
+                    wt_name = rec[0].value
+                    wt_date = rec[6].value
+                    if (wt_name is not None) and (wt_date is not None):
+                        # print("judge")
+                        # print(name)
+                        # print(wt_name)
+                        # print(date)
+                        # print(wt_date)
+                        if (name in wt_name) and (date in wt_date):
+                            wt_start = rec[8].value
+                            wt_end = rec[10].value
+
+                            x = ElasTime(wt_start, wt_end).elas_hrs()
+                            print(x)
+                        
 
 class CalOt:
     def __init__(self):
@@ -135,21 +179,26 @@ class CalOt:
         for ot_ws in ot_records:
             for rec in ot_ws.rows:
                 if (rec[0].value) != "审批编号":
-                    ot_owner = rec[14].value
+                    ot_name = rec[14].value
                     ot_start = rec[15].value
                     ot_end = rec[16].value
                     ot_elapsed = rec[20].value
-                    ot_start_day = ot_start.split()[0]
+                    ot_start_day = ot_start.split()[0][2:]
                     ot_start_time = ot_start.split()[1]
-                    ot_end_day = ot_end.split()[0]
+                    ot_end_day = ot_end.split()[0][2:]
                     ot_end_time = ot_end.split()[1]
-                    x = StrToDatetime(ot_start).res
-                    print(x)
+                    CalWt().match_records(ot_name, ot_start_day)
+                    # x = StrToDatetime(ot_start).res
+                    # print(x)
+                    #
+                    # print(ot_name)
+                    # print(ot_start)
+                    # print(ot_end)
+                    # print(ot_elapsed)
 
-                    print(ot_owner)
-                    print(ot_start)
-                    print(ot_end)
-                    print(ot_elapsed)
+
+
+
 
 
         # print(ot_records.worksheets[0].title)
