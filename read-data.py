@@ -34,6 +34,10 @@ class StrToDatetime:
         ymd = datetime.datetime.strptime(self.time_tr, '%Y-%m-%d')
         return ymd
 
+    def dt_all(self):
+        all = datetime.datetime.strptime(self.time_tr, '%Y-%m-%d %H:%M')
+        return all
+
 
 class ElasTime:
     def __init__(self, time_start, time_end):
@@ -55,8 +59,9 @@ class IsWorkDay:
         # w_date_f = datetime.datetime.strptime(w_date, '%Y-%m-%d %H:%M')
 
         # self.w_res = chinese_calendar.is_workday(w_date_f)
-        self.w_res = chinese_calendar.is_workday(w_date)
-        on_holiday, holiday_name = chinese_calendar.get_holiday_detail(w_date)
+        w_date_f = StrToDatetime(w_date).dt_all()
+        self.w_res = chinese_calendar.is_workday(w_date_f)
+        on_holiday, holiday_name = chinese_calendar.get_holiday_detail(w_date_f)
         print("is work day?", self.w_res)
         print("is holiday?", on_holiday)
         print("holiday name?", holiday_name)
@@ -164,9 +169,32 @@ class CalWt:
                         if (name in wt_name) and (date in wt_date):
                             wt_start = rec[8].value
                             wt_end = rec[10].value
+                            wt_es = ElasTime(wt_start, wt_end).elas_hrs()
+                            return wt_start, wt_end, wt_es
 
-                            x = ElasTime(wt_start, wt_end).elas_hrs()
-                            print(x)
+
+class OtApprv:
+    def __init__(self, ot_day, ot_start, ot_end, wt_start, wt_end, wt_elas):
+        self.std_end = '17:30'
+        self.res = False
+        ot_elas_hrs = ElasTime(ot_start, ot_end).elas_hrs()
+        ot_is_wd = IsWorkDay(ot_day).res
+        if ot_elas_hrs >= 2.5:
+            if ot_is_wd is False:
+                if (ot_start >= wt_start) and (ot_end >= wt_end):
+                    self.res = True
+            else:
+                if wt_elas >= 11.5:
+                    if (ot_start >= self.std_end) and (ot_start >= (wt_start + 9)):
+                        if ot_end >= wt_end:
+                            self.res = True
+
+
+    @property
+    def res(self):
+        return self.res
+
+
                         
 
 class CalOt:
@@ -183,11 +211,20 @@ class CalOt:
                     ot_start = rec[15].value
                     ot_end = rec[16].value
                     ot_elapsed = rec[20].value
-                    ot_start_day = ot_start.split()[0][2:]
+                    ot_start_fmt = ot_start.split()[0][2:]
                     ot_start_time = ot_start.split()[1]
-                    ot_end_day = ot_end.split()[0][2:]
+                    ot_end_fmt = ot_end.split()[0][2:]
                     ot_end_time = ot_end.split()[1]
-                    CalWt().match_records(ot_name, ot_start_day)
+
+                    wt_rec = CalWt().match_records(ot_name, ot_start_fmt)
+                    # ot_is_wd = IsWorkDay(ot_start).res
+                    # ot_elas_hrs = ElasTime(ot_start_time, ot_end_time).elas_hrs()
+
+
+
+
+                    print(ot_is_wd)
+                    print(wt_rec)
                     # x = StrToDatetime(ot_start).res
                     # print(x)
                     #
