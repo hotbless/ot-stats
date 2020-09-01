@@ -4,7 +4,7 @@ import chinese_calendar
 
 
 
-# class StrToDatetime:
+# class CalDatetime:
 #     def __init__(self, str_time):
 #         self.dt_day = str_time.split()[0]
 #         self.dt_time = str_time.split()[1]
@@ -22,7 +22,7 @@ import chinese_calendar
 #         return self.dt_day, self.dt_time
 
 
-class StrToDatetime:
+class CalDatetime:
     def __init__(self, str_time):
         self.time_tr = str_time
 
@@ -39,14 +39,15 @@ class StrToDatetime:
         return all
 
 
+
 class ElasTime:
     def __init__(self, time_start, time_end):
         self.time_start = time_start
         self.time_end = time_end
 
     def hm_str_to_dt(self):
-        self.time_start = StrToDatetime(self.time_start).dt_hrmin()
-        self.time_end = StrToDatetime(self.time_end).dt_hrmin()
+        self.time_start = CalDatetime(self.time_start).dt_hrmin()
+        self.time_end = CalDatetime(self.time_end).dt_hrmin()
 
     def elas_hrs(self):
         self.hm_str_to_dt()
@@ -59,7 +60,7 @@ class IsWorkDay:
         # w_date_f = datetime.datetime.strptime(w_date, '%Y-%m-%d %H:%M')
 
         # self.w_res = chinese_calendar.is_workday(w_date_f)
-        w_date_f = StrToDatetime(w_date).dt_all()
+        w_date_f = CalDatetime(w_date).dt_all()
         self.w_res = chinese_calendar.is_workday(w_date_f)
         on_holiday, holiday_name = chinese_calendar.get_holiday_detail(w_date_f)
         print("is work day?", self.w_res)
@@ -127,14 +128,14 @@ class CalDate:
         ot_records = ReadOtData().read_data()
         # ot_name = ot_records[0]['over']
         # print(ot_name)
-        ot_start = StrToDatetime(ot_records[0]['开始时间']).res
+        ot_start = CalDatetime(ot_records[0]['开始时间']).res
         print(ot_start)
         d_res = IsWorkDay(ot_start).res
         if d_res is True:
             print("workday")
         else:
             print("holiday")
-        ot_end = StrToDatetime(ot_records[0]['结束时间']).res
+        ot_end = CalDatetime(ot_records[0]['结束时间']).res
         print(ot_end)
         ot_mins = ElasTime(ot_start, ot_end).res / 60
         print(ot_mins)
@@ -175,23 +176,18 @@ class CalWt:
 
 class OtApprv:
     def __init__(self, ot_day, ot_start, ot_end, wt_start, wt_end, wt_elas):
-        self.std_end = '17:30'
+        self.dt_std_edn = CalDatetime('17:30').dt_hrmin()
         self.res = False
         ot_elas_hrs = ElasTime(ot_start, ot_end).elas_hrs()
         ot_is_wd = IsWorkDay(ot_day).res
-        if ot_elas_hrs >= 2.5:
-            if ot_is_wd is False:
-                if (ot_start >= wt_start) and (ot_end >= wt_end):
-                    self.res = True
-            else:
-                if wt_elas >= 11.5:
-                    if (ot_start >= self.std_end) and (ot_start >= (wt_start + 9)):
-                        if ot_end >= wt_end:
-                            self.res = True
-
+        if (ot_elas_hrs >= 2.5) and (ot_is_wd is False) and (ot_start >= wt_start) and (ot_end >= wt_end):
+            self.res = True
+        else:
+            if (wt_elas >= 11.5) and (ot_start >= self.dt_std_edn) and (ot_start >= (wt_start + 9)) and (ot_end >= wt_end):
+                self.res = True
 
     @property
-    def res(self):
+    def ot_res(self):
         return self.res
 
 
@@ -217,15 +213,17 @@ class CalOt:
                     ot_end_time = ot_end.split()[1]
 
                     wt_rec = CalWt().match_records(ot_name, ot_start_fmt)
-                    # ot_is_wd = IsWorkDay(ot_start).res
+                    ot_is_wd = IsWorkDay(ot_start).res
                     # ot_elas_hrs = ElasTime(ot_start_time, ot_end_time).elas_hrs()
 
+                    ot_appr = OtApprv(otday=ot_start, ot_start=ot_start_time, ot_end=ot_end_time, wt_start=wt_rec[0], wt_end=wt_rec[1], wt_elas=wt_rec[2]).res
+                    print(ot_appr)
 
 
 
                     print(ot_is_wd)
                     print(wt_rec)
-                    # x = StrToDatetime(ot_start).res
+                    # x = CalDatetime(ot_start).res
                     # print(x)
                     #
                     # print(ot_name)
@@ -265,12 +263,25 @@ class CalOt:
         
         
         
-        
-        
-        
-        
-        
+class XTest:
+    def __init__(self):
+        pass
 
+
+    def dtcompr(self):
+        std_end = '2020-06-02 17:30'
+        wt_end = '2020-06-03 17:30'
+        dt_std_end = CalDatetime(std_end).dt_all()
+        dt_wt_end = CalDatetime(wt_end).dt_all()
+        if dt_wt_end >= dt_std_end:
+            print('True')
+        else:
+            print('False')
+        
+        
+        
+        
+# XTest().dtcompr()
 
 # wt_wb = ReadWtData().read_data()
 # ot_wb = ReadOtData().read_data()
