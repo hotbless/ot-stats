@@ -64,3 +64,12 @@ class XTest:
             print('True')
         else:
             print('False')
+
+    def test_str(self):
+        strtest = []
+        strtest.append('y')
+        print('x')
+        print(strtest)
+
+
+XTest().test_str()

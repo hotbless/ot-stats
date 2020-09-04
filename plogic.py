@@ -8,7 +8,7 @@ class CalWt:
     def __init__(self):
         self.wb = openpyxl.load_workbook(filename='new_wt.xlsx')
         self.apv_flag = True
-        self.ref_cmts = ''
+        self.ref_cmts = []
 
     def match_records(self, name, date):
         # print(name)
@@ -28,11 +28,11 @@ class CalWt:
                             wt_end = rec[10].value
                             wt_es = ElasTime(wt_start, wt_end).elas_hrs()
                             self.apv_flag = True
-                            self.ref_cmts = ''
+                            self.ref_cmts = list()
                             break
                         else:
                             self.apv_flag = False
-                            self.ref_cmts = 'wt表中无对应记录'
+                            self.ref_cmts = list('工作表中无对应记录')
                 return wt_start, wt_end, wt_es, self.apv_flag, self.ref_cmts
 
 
@@ -76,9 +76,9 @@ class CalOt:
                     # ot_elas_hrs = ElasTime(ot_start_time, ot_end_time).elas_hrs()
                     if wt_rec[3] is True:
                         ot_appr = OtApprv(ot_day=ot_start, ot_s=ot_start_time, ot_e=ot_end_time, wt_s=wt_rec[0], wt_e=wt_rec[1], wt_elas=wt_rec[2]).ot_res
-                        print(ot_name + ' 开始于 ' +ot_start + ' 的 ' + ot_elapsed + ' 小时加班审核结果是: '+str(ot_appr))
+                        print(ot_name + ' 开始于 ' +ot_start + ' 的 ' + ot_elapsed + ' 小时加班审核结果是: '+str(ot_appr[0])+''.join(ot_appr[1]))
                     else:
-                        print(str(wt_rec[3]) + wt_rec[4])
+                        print(str(wt_rec[3]) + ''.join(wt_rec[4]))
 
                     # print(ot_is_wd)
                     # print(wt_rec)

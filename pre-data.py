@@ -60,6 +60,7 @@ class WorkDay:
         print("is holiday?", on_holiday)
         print("holiday name?", holiday_name)
 
+
 # Check if the date is workday and return
 class IsWorkDay:
     def __init__(self, w_date):
