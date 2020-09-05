@@ -1,8 +1,15 @@
+# from openpyxl.cell.cell import Cell
+# from openpyxl.styles import Font
 import openpyxl
+
 
 from approve import OtApprv
 from timem import ElasTime
 from exceldata import ResToXlsx
+
+import openpyxl
+from openpyxl.cell.cell import Cell
+from openpyxl.styles import Font
 
 
 class LogicStr:
@@ -11,6 +18,7 @@ class LogicStr:
 
     @property
     def res(self):
+        restr = ''
         if self.logic == False:
             restr = '拒绝'
         else:
@@ -103,10 +111,21 @@ class CalOt:
 
         ws_re = self.wb_re['批准结果']
         for row in self.re_data:
+            for each in row:
+                if each == '批准':
+                    each = openpyxl.cell.cell.Cell(ws_re)
+                    each.font = openpyxl.styles.Font(b=True, color="00FF00")
+                else:
+                    if each == '拒绝':
+                        each = openpyxl.cell.cell.Cell(ws_re)
+                        each.font = openpyxl.styles.Font(b=True, color="FF0000")
+                # yield each
             ws_re.append(row)
         self.wb_re.save(filename='results.xlsx')
                     # print(ot_is_wd)
                     # print(wt_rec)
 
-ResToXlsx().res_to_file()
-CalOt().calculate_date()
+
+if __name__ == '__main__':
+    ResToXlsx().res_to_file()
+    CalOt().calculate_date()
