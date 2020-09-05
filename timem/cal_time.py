@@ -70,6 +70,3 @@ class XTest:
         strtest.append('y')
         print('x')
         print(strtest)
-
-
-XTest().test_str()

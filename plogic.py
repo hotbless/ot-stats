@@ -2,6 +2,21 @@ import openpyxl
 
 from approve import OtApprv
 from timem import ElasTime
+from exceldata import ResToXlsx
+
+
+class LogicStr:
+    def __init__(self, logic):
+        self.logic = logic
+
+    @property
+    def res(self):
+        if self.logic == False:
+            restr = '拒绝'
+        else:
+            if self.logic == True:
+                restr = '批准'
+        return restr
 
 
 class CalWt:
@@ -52,16 +67,18 @@ class CalWt:
 
 class CalOt:
     def __init__(self):
-        self.wb = openpyxl.load_workbook(filename='new_ot.xlsx')
+        self.wb_ot = openpyxl.load_workbook(filename='new_ot.xlsx')
+        self.wb_re = openpyxl.load_workbook(filename='results.xlsx')
+        self.re_data = list()
 
     def calculate_date(self):
-        ot_records = self.wb
+        ot_records = self.wb_ot
         print(ot_records)
 
         for ot_ws in ot_records:
             print(ot_ws)
             for rec in ot_ws.rows:
-                if (rec[0].value) != "审批编号":
+                if rec[0].value != "审批编号":
                     ot_name = rec[14].value
                     ot_start = rec[15].value
                     ot_end = rec[16].value
@@ -77,11 +94,19 @@ class CalOt:
                     if wt_rec[3] is True:
                         ot_appr = OtApprv(ot_day=ot_start, ot_s=ot_start_time, ot_e=ot_end_time, wt_s=wt_rec[0], wt_e=wt_rec[1], wt_elas=wt_rec[2]).ot_res
                         print(ot_name + ' 开始于 ' +ot_start + ' 的 ' + ot_elapsed + ' 小时加班审核结果是: '+str(ot_appr[0])+''.join(ot_appr[1]))
+                        self.re_data.append([ot_name, ot_start, ot_end, ot_elapsed, LogicStr(ot_appr[0]).res, ''.join(ot_appr[1])])
+                        print(self.re_data)
                     else:
                         print(str(wt_rec[3]) + ''.join(wt_rec[4]))
+                        self.re_data.append([ot_name, ot_start, ot_end, ot_elapsed, LogicStr(wt_rec[3]).res, ''.join(wt_rec[4])])
+                        print(self.re_data)
 
+        ws_re = self.wb_re['批准结果']
+        for row in self.re_data:
+            ws_re.append(row)
+        self.wb_re.save(filename='results.xlsx')
                     # print(ot_is_wd)
                     # print(wt_rec)
 
-
+ResToXlsx().res_to_file()
 CalOt().calculate_date()
