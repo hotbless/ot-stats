@@ -11,6 +11,8 @@ import openpyxl
 from openpyxl.cell.cell import Cell
 from openpyxl.styles import Font
 
+from xldata import ReadOtData, ReadWtData
+
 
 class LogicStr:
     def __init__(self, logic):
@@ -49,10 +51,14 @@ class CalWt:
                         if (name in wt_name) and (date in wt_date):
                             wt_start = rec[8].value
                             wt_end = rec[10].value
-                            wt_es = ElasTime(wt_start, wt_end).elas_hrs()
-                            self.apv_flag = True
-                            self.ref_cmts = list()
-                            break
+                            if (wt_start is not None) and (wt_end is not None):
+                                wt_es = ElasTime(wt_start, wt_end).elas_hrs()
+                                self.apv_flag = True
+                                self.ref_cmts = list()
+                                break
+                            else:
+                                self.apv_flag = False
+                                self.ref_cmts = list('工作表中无对应记录')
                         else:
                             self.apv_flag = False
                             self.ref_cmts = list('工作表中无对应记录')
@@ -113,19 +119,28 @@ class CalOt:
         for row in self.re_data:
             for each in row:
                 if each == '批准':
-                    each = openpyxl.cell.cell.Cell(ws_re)
-                    each.font = openpyxl.styles.Font(b=True, color="00FF00")
+                    each = openpyxl.cell.Cell(ws_re)
+                    each.font = openpyxl.styles.Font(bold=True, color="00FF00")
                 else:
                     if each == '拒绝':
-                        each = openpyxl.cell.cell.Cell(ws_re)
-                        each.font = openpyxl.styles.Font(b=True, color="FF0000")
+                        each = openpyxl.cell.Cell(ws_re)
+                        each.font = openpyxl.styles.Font(bold=True, color="FF0000")
                 # yield each
             ws_re.append(row)
+        self.wb_re.save(filename='results.xlsx')
+        for cl in ws_re['E']:
+            if cl.value == '批准':
+                cl.font = openpyxl.styles.Font(bold=True, color="00FF00")
+            else:
+                if cl.value == '拒绝':
+                    cl.font = openpyxl.styles.Font(bold=True, color="FF0000")
         self.wb_re.save(filename='results.xlsx')
                     # print(ot_is_wd)
                     # print(wt_rec)
 
 
 if __name__ == '__main__':
+    ReadOtData().read_data()
+    ReadWtData().read_data()
     ResToXlsx().res_to_file()
     CalOt().calculate_date()
