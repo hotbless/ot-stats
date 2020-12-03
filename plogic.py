@@ -52,7 +52,10 @@ class CalWt:
                             wt_start = rec[8].value
                             wt_end = rec[10].value
                             if (wt_start is not None) and (wt_end is not None):
-                                wt_es = ElasTime(wt_start, wt_end).elas_hrs()
+                                if '次日' not in wt_end:
+                                    wt_es = ElasTime(wt_start, wt_end).elas_hrs()
+                                else:
+                                    wt_es = ElasTime(wt_start, wt_end.split(' ')[1]).next_hrs()
                                 self.apv_flag = True
                                 self.ref_cmts = list()
                                 break

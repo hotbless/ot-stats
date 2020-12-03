@@ -18,6 +18,10 @@ class CalDatetime:
         all = datetime.datetime.strptime(self.time_tr, '%Y-%m-%d %H:%M')
         return all
 
+    def dt_nextday(self):
+        nextday = datetime.datetime.strptime(self.time_tr, '%H:%M') + datetime.timedelta(hours=24)
+        return nextday
+
 
 class ElasTime:
     def __init__(self, time_start, time_end):
@@ -28,9 +32,18 @@ class ElasTime:
         self.time_start = CalDatetime(self.time_start).dt_hrmin()
         self.time_end = CalDatetime(self.time_end).dt_hrmin()
 
+    def hm_str_to_next_dt(self):
+        self.time_start = CalDatetime(self.time_start).dt_hrmin()
+        self.time_end = CalDatetime(self.time_end).dt_nextday()
+
     def elas_hrs(self):
         self.hm_str_to_dt()
         es = (self.time_end - self.time_start).seconds/3600
+        return es
+
+    def next_hrs(self):
+        self.hm_str_to_next_dt()
+        es = (self.time_end - self.time_start).seconds / 3600
         return es
 
 
