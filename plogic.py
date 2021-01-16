@@ -110,7 +110,8 @@ class CalOt:
                     # ot_elas_hrs = ElasTime(ot_start_time, ot_end_time).elas_hrs()
                     if wt_rec[3] is True:
                         ot_appr = OtApprv(ot_day=ot_start, ot_s=ot_start_time, ot_e=ot_end_time, wt_s=wt_rec[0], wt_e=wt_rec[1], wt_elas=wt_rec[2]).ot_res
-                        print(ot_name + ' 开始于 ' +ot_start + ' 的 ' + ot_elapsed + ' 小时加班审核结果是: '+str(ot_appr[0])+''.join(ot_appr[1]))
+                        # print(ot_name + ' 开始于 ' +ot_start + ' 的 ' + ot_elapsed + ' 小时加班审核结果是: '+str(ot_appr[0])+''.join(ot_appr[1]))
+                        print(f"{ot_name} 开始于 {ot_start} 的 {ot_elapsed} 小时加班审核结果是: {ot_appr[0]}{''.join(ot_appr[1])}")
                         self.re_data.append([ot_name, ot_start, ot_end, ot_elapsed, LogicStr(ot_appr[0]).res, ''.join(ot_appr[1])])
                         print(self.re_data)
                     else:

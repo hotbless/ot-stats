@@ -39,7 +39,8 @@ class OtApprv:
                 if ot_s_dt < (wt_s_dt + datetime.timedelta(hours=9)):
                     cal_wt_e = (wt_s_dt + datetime.timedelta(hours=9)).strftime('%H:%M')
                     self.res = False
-                    self.ref_cmts.append('工作日加班申请开始时间' + ot_s + '早于所应下班时间' + cal_wt_e)
+                    # self.ref_cmts.append('工作日加班申请开始时间' + ot_s + '早于所应下班时间' + cal_wt_e)
+                    self.ref_cmts.append(f"工作日加班申请开始时间 {ot_s} 早于所应下班时间 {cal_wt_e}")
                 if ot_e > wt_e:
                     self.res = False
                     self.ref_cmts.append('加班申请结束时间' + ot_e + '晚于打卡结束时间' + wt_e)
